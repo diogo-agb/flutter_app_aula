@@ -24,68 +24,137 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  var _color = Colors.blue;
-  String _txt = 'Par';
+  TextEditingController alcoolController = TextEditingController();
+  TextEditingController gasolinaController = TextEditingController();
 
-  void _incrementCounter() {
+  String _resultado = '';
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  void _reset() {
+    alcoolController.text = '';
+    gasolinaController.text = '';
+
     setState(() {
-      _counter++;
-      parOuImpar(_counter);
+      _resultado = '';
+      _formKey = GlobalKey<FormState>();
     });
   }
 
-  void parOuImpar(int counter) {
-    if (counter % 2 == 0) {
-      _color = Colors.blue;
-      _txt = 'Par';
-    } else {
-      _color = Colors.red;
-      _txt = 'Ímpar';
-    }
+  void _calcularCombustivelIdeal() {
+    setState(() {
+      double varAlcool =
+          double.parse(alcoolController.text.replaceAll(',', '.'));
+      double varGasolina =
+          double.parse(gasolinaController.text.replaceAll(',', '.'));
+      double proporcao = varAlcool / varGasolina;
+
+      _resultado =
+          (proporcao < 0.7) ? 'Abasteça com Álcool' : 'Abasteça com Gasolina';
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('APP'),
+        title: Text(
+          'Álcool ou Gasolina?',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.lightBlue[900],
+        actions: <Widget>[
+          IconButton(
+              icon: Icon(Icons.refresh),
+              onPressed: () {
+                _reset();
+              }),
+        ],
       ),
-      body: Container(
-        color: _color,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(30.0, 0, 30.0, 0),
+        child: Form(
+          key: _formKey,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              // buildDropdownButton(),
-              Text(
-                'Aperte o botão para incrementar o número e mudar de cor!',
-                style: TextStyle(
-                  fontSize: 20,
-                ),
-                textAlign: TextAlign.center,
+              Icon(
+                Icons.local_gas_station,
+                size: 100,
+                color: Colors.lightBlue[900],
               ),
-              Text(
-                '$_counter',
-                style: TextStyle(fontSize: 50),
+              TextFormField(
+                controller: alcoolController,
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Informe o valor do álcool'
+                    : null,
+                decoration: InputDecoration(
+                  labelText: 'Valor do álcool',
+                  labelStyle: TextStyle(color: Colors.lightBlue[900]),
+                ),
+                style: TextStyle(
+                  color: Colors.lightBlue[900],
+                  fontSize: 25.00,
+                ),
               ),
               SizedBox(
-                height: 10,
+                height: 50,
+              ),
+              TextFormField(
+                controller: gasolinaController,
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Informe o valor da gasolina'
+                    : null,
+                decoration: InputDecoration(
+                  labelText: 'Valor da gasolina',
+                  labelStyle: TextStyle(
+                    color: Colors.lightBlue[900],
+                    fontSize: 25.00,
+                  ),
+                ),
+                style: TextStyle(
+                  color: Colors.lightBlue[900],
+                  fontSize: 25.00,
+                ),
+              ),
+              SizedBox(
+                height: 50,
+              ),
+              Container(
+                height: 50,
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(Colors.green),
+                  ),
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      _calcularCombustivelIdeal();
+                    }
+                  },
+                  child: Text(
+                    'Verificar',
+                    style: TextStyle(fontSize: 25),
+                  ),
+                ),
               ),
               Text(
-                '$_txt',
-                style: TextStyle(fontSize: 40),
+                _resultado,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.lightBlue[900],
+                  fontSize: 30.0,
+                ),
               ),
             ],
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: _color,
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
       ),
     );
   }
